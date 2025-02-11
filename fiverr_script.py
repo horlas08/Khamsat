@@ -1,0 +1,26 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+import time
+
+options = webdriver.ChromeOptions()
+options.add_argument("--headless")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+
+driver = webdriver.Chrome(options=options)
+driver.get("https://www.fiverr.com/login")
+
+# Login
+driver.find_element(By.NAME, "email").send_keys("your-email@example.com")
+driver.find_element(By.NAME, "password").send_keys("your-password")
+driver.find_element(By.NAME, "password").send_keys(Keys.RETURN)
+
+time.sleep(10)
+print("Logged in successfully")
+
+# Refresh Fiverr every hour
+while True:
+    driver.get("https://www.fiverr.com/")
+    print("Session refreshed")
+    time.sleep(3600)  # 1 hour
