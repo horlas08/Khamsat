@@ -15,18 +15,19 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y wget unzip google-chrome-stable
+          sudo apt install -y wget unzip google-chrome-stable python3-pip
+          
+          # Install Selenium
+          pip3 install selenium
 
-          # Set Chrome and ChromeDriver version
+          # Download Chrome & ChromeDriver
           CHROME_VERSION="133.0.6943.98"
           CHROMEDRIVER_VERSION="133.0.6943.98"
 
-          # Download Chrome
           wget "https://storage.googleapis.com/chrome-for-testing-public/$CHROME_VERSION/linux64/chrome-linux64.zip"
           unzip chrome-linux64.zip
           sudo mv chrome-linux64 /usr/local/bin/google-chrome
 
-          # Download ChromeDriver
           wget "https://storage.googleapis.com/chrome-for-testing-public/$CHROMEDRIVER_VERSION/linux64/chromedriver-linux64.zip"
           unzip chromedriver-linux64.zip
           sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
