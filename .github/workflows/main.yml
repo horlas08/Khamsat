@@ -3,7 +3,7 @@ name: Keep Fiverr Logged In
 on:
   schedule:
     - cron: '0 * * * *'  # Runs every hour
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch:  # Allows manual trigger
 
 jobs:
   keep-online:
@@ -16,12 +16,17 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y wget unzip google-chrome-stable
-          
-          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
-          CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
 
-          wget "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
-          unzip chromedriver_linux64.zip
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
+          CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_$CHROME_VERSION")
+
+          if [ -z "$CHROMEDRIVER_VERSION" ]; then
+            echo "Failed to get ChromeDriver version, using backup version"
+            CHROMEDRIVER_VERSION="133.0.6943.53"  # Manually set a fallback version if needed
+          fi
+
+          wget "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip" -O chromedriver.zip
+          unzip chromedriver.zip
           sudo mv chromedriver /usr/local/bin/
 
       - name: Run Script
