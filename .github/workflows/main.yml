@@ -3,6 +3,7 @@ name: Keep Fiverr Logged In
 on:
   schedule:
     - cron: '0 * * * *'  # Runs every hour
+  workflow_dispatch:  # Allows manual triggering
 
 jobs:
   keep-online:
@@ -15,14 +16,10 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y wget unzip google-chrome-stable
-
-          # Get installed Chrome version
+          
           CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
-
-          # Get the correct ChromeDriver version
           CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
 
-          # Download and install ChromeDriver
           wget "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
           unzip chromedriver_linux64.zip
           sudo mv chromedriver /usr/local/bin/
