@@ -9,11 +9,11 @@ options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 
 driver = webdriver.Chrome(options=options)
-driver.get("https://www.fiverr.com/login")
+driver.get("https://accounts.hsoub.com/login?source=khamsat&locale=ar")
 
 # Login
-driver.find_element(By.NAME, "email").send_keys("your-email@example.com")
-driver.find_element(By.NAME, "password").send_keys("your-password")
+driver.find_element(By.NAME, "email").send_keys("qozeemmonsurudeen@gmail.com")
+driver.find_element(By.NAME, "password").send_keys("horlas082001")
 driver.find_element(By.NAME, "password").send_keys(Keys.RETURN)
 
 time.sleep(10)
