@@ -17,17 +17,20 @@ jobs:
           sudo apt update
           sudo apt install -y wget unzip google-chrome-stable
 
-          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
-          CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_$CHROME_VERSION")
+          # Set Chrome and ChromeDriver version
+          CHROME_VERSION="133.0.6943.98"
+          CHROMEDRIVER_VERSION="133.0.6943.98"
 
-          if [ -z "$CHROMEDRIVER_VERSION" ]; then
-            echo "Failed to get ChromeDriver version, using backup version"
-            CHROMEDRIVER_VERSION="133.0.6943.53"  # Manually set a fallback version if needed
-          fi
+          # Download Chrome
+          wget "https://storage.googleapis.com/chrome-for-testing-public/$CHROME_VERSION/linux64/chrome-linux64.zip"
+          unzip chrome-linux64.zip
+          sudo mv chrome-linux64 /usr/local/bin/google-chrome
 
-          wget "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip" -O chromedriver.zip
-          unzip chromedriver.zip
-          sudo mv chromedriver /usr/local/bin/
+          # Download ChromeDriver
+          wget "https://storage.googleapis.com/chrome-for-testing-public/$CHROMEDRIVER_VERSION/linux64/chromedriver-linux64.zip"
+          unzip chromedriver-linux64.zip
+          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+          sudo chmod +x /usr/local/bin/chromedriver
 
       - name: Run Script
         run: |
