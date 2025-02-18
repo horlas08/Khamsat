@@ -37,10 +37,10 @@ time.sleep(5)
 # Try logging in
 try:
     email_input = driver.find_element(By.NAME, "email")
-    email_input.send_keys("your-email@example.com")  # Change this
+    email_input.send_keys("qozeemmonsurudeen@gmail.com")  # Change this
 
     password_input = driver.find_element(By.NAME, "password")
-    password_input.send_keys("your-password")  # Change this
+    password_input.send_keys("horlas082001")  # Change this
     password_input.send_keys(Keys.RETURN)
 
     print("Login attempted successfully!")
