@@ -1,38 +1,39 @@
-name: Keep Khamsta Logged In
+name: Keep Khamsat Logged In and Active
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Runs every hour
-  workflow_dispatch:  # Allows manual trigger
+    - cron: '0 * * * *'  # Every hour (you can change to once daily if preferred)
+  workflow_dispatch:  # Allows manual run
 
 jobs:
-  keep-online:
+  keep-active:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Install Dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y wget unzip google-chrome-stable python3-pip
-          
-          # Install Selenium
-          pip3 install selenium
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'  # Adjust if needed
 
-          # Download Chrome & ChromeDriver
-          CHROME_VERSION="133.0.6943.98"
-          CHROMEDRIVER_VERSION="133.0.6943.98"
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install selenium webdriver-manager
 
-          wget "https://storage.googleapis.com/chrome-for-testing-public/$CHROME_VERSION/linux64/chrome-linux64.zip"
-          unzip chrome-linux64.zip
-          sudo mv chrome-linux64 /usr/local/bin/google-chrome
+    - name: Install Chrome & Chromedriver
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget unzip
+        wget https://storage.googleapis.com/chrome-for-testing-public/133.0.6943.98/linux64/chrome-linux64.zip
+        wget https://storage.googleapis.com/chrome-for-testing-public/133.0.6943.98/linux64/chromedriver-linux64.zip
+        unzip chrome-linux64.zip
+        unzip chromedriver-linux64.zip
+        sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
+        sudo mv chrome-linux64/chrome /usr/local/bin/google-chrome
+        chmod +x /usr/local/bin/google-chrome /usr/local/bin/chromedriver
 
-          wget "https://storage.googleapis.com/chrome-for-testing-public/$CHROMEDRIVER_VERSION/linux64/chromedriver-linux64.zip"
-          unzip chromedriver-linux64.zip
-          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
-          sudo chmod +x /usr/local/bin/chromedriver
-
-      - name: Run Script
-        run: |
-          python3 fiverr_script.py
+    - name: Run the Khamsat Activity Script
+      run: python3 fiverr_script.py
