@@ -15,6 +15,15 @@ COOKIES_FILE = "cookies.json"
 TARGET_URL = "https://khamsat.com/"
 
 
+def get_chrome_major_version():
+    result = subprocess.run(
+        ["/opt/google/chrome/chrome", "--version"],
+        capture_output=True, text=True
+    )
+    version = result.stdout.strip().split()[2]
+    return version.split(".")[0]
+
+
 def setup_driver():
     options = webdriver.ChromeOptions()
     options.add_argument("--headless=new")
@@ -24,9 +33,10 @@ def setup_driver():
     temp_user_data_dir = tempfile.mkdtemp()
     options.add_argument(f"--user-data-dir={temp_user_data_dir}")
 
-    # ✅ Always download the correct driver for installed Chrome
+    chrome_major = get_chrome_major_version()
+
     driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
+        service=Service(ChromeDriverManager(driver_version=chrome_major).install()),
         options=options
     )
     return driver
