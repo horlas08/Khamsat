@@ -1,0 +1,54 @@
+[
+    {
+        "domain": "khamsat.com",
+        "expirationDate": 1774124122.769628,
+        "hostOnly": true,
+        "httpOnly": true,
+        "name": "rack.session",
+        "path": "/",
+        "sameSite": "lax",
+        "secure": true,
+        "session": false,
+        "storeId": null,
+        "value": "E23lrQrq0GkXA0gaNJ9hxAYUqCrVyLkmKiZ7Xnj2MEZJfMCoyGnzICX5x0IFtOJANZArvBWAYDYYMF1TJapBDvMsG8bWLByVmi91NVa2WqonvekPZ3KE4Pjji8KfYAPZrbYYgpkoqGvkAmxiPSJ1D8yBylHqGw8NKCpaFDa%2FEu1AR4AnNw2KIAJqEdJ1CmEND6oDMWw87eCXDPQQa71bDxMEsOL00N4TcxPdso8Wt9W6b5hcI9MCddj7%2Fpu2IjqXv%2Bg1HVkCndEJLkdHLq4Xb4IvVH63H30PN5Tcm95Tbw0ePMxA071cVjR02W7jDCSCoyXEL1gnS5UOslzIcL2pea185%2FUTnIW6aBbiyOcBZPdwZvmR1hK%2BXvyA1tx2jD8%2FWMnkeP77wcsR7R0SnBIjSnXiywYKb8l1a6ILJ%2FiqJ7MQezRfku9Bi75TJTZhPYiietlG1ylKy57%2Bc6MmbDWJ7NqVCn1UwzupZa04Nrww43eZrr6YGX8tL5buGUNpYYtxp5eEQf98aByDWzdjLPL%2B7LA3LucYAHBUBgOmaE5kdjLC6VQbJgZtYQLZEcqWb6VM9bAIpNh%2B%2FvBnKL9Zni1H6pI54avU4AZN4VxPGt%2FJzH4%3D"
+    },
+    {
+        "domain": ".khamsat.com",
+        "expirationDate": 1789223665,
+        "hostOnly": false,
+        "httpOnly": false,
+        "name": "__stripe_mid",
+        "path": "/",
+        "sameSite": "strict",
+        "secure": true,
+        "session": false,
+        "storeId": null,
+        "value": "e51da9fa-b645-4874-b2d4-9e7d7b01f6f93ec09a"
+    },
+    {
+        "domain": ".khamsat.com",
+        "expirationDate": 1758777164,
+        "hostOnly": false,
+        "httpOnly": false,
+        "name": "aws-waf-token",
+        "path": "/",
+        "sameSite": "lax",
+        "secure": true,
+        "session": false,
+        "storeId": null,
+        "value": "056ba6f8-de60-4426-8396-065e70f4934e:CgoAmRkkaSAJAAAA:9qYfQc9ScpdycRkkZP+LFnsgACVPcwzdVmxDQ2ejtkryLXEIa8BtQ4ZD+kM9SyazjfnZZluS6EeLUqzIwG036/uNPNV1tMSnHBrQADAarVt5TSVNK/wktJmptxJokt4v5mIPQdIYZ2wXR77+kALU84K8rIStyN/sVMQjuEUWU1Mu1IV/tJqRB+zIiwmSCw=="
+    },
+    {
+        "domain": "khamsat.com",
+        "expirationDate": 1761082180.769145,
+        "hostOnly": true,
+        "httpOnly": true,
+        "name": "khamsat_cart",
+        "path": "/",
+        "sameSite": null,
+        "secure": true,
+        "session": false,
+        "storeId": null,
+        "value": "4D3M1O8B1"
+    }
+]
