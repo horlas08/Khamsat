@@ -9,20 +9,17 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
 
-# ---------- CONFIG ----------
 COOKIES_FILE = "cookies.json"
 TARGET_URL = "https://khamsat.com/"
-# ----------------------------
 
 
 def get_chrome_major_version():
-    """Get installed Chrome major version (e.g. 140)."""
     result = subprocess.run(
         ["/opt/google/chrome/chrome", "--version"],
         capture_output=True, text=True
     )
-    version = result.stdout.strip().split()[2]  # e.g. "140.0.7339.80"
-    return version.split(".")[0]  # "140"
+    version = result.stdout.strip().split()[2]
+    return version.split(".")[0]
 
 
 def setup_driver():
@@ -31,11 +28,9 @@ def setup_driver():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
-    # unique temp user data dir (avoid session not created error)
     temp_user_data_dir = tempfile.mkdtemp()
     options.add_argument(f"--user-data-dir={temp_user_data_dir}")
 
-    # auto-detect installed Chrome version
     chrome_major = get_chrome_major_version()
 
     driver = webdriver.Chrome(
@@ -53,7 +48,7 @@ def load_cookies(driver, cookies_file):
     with open(cookies_file, "r") as f:
         cookies = json.load(f)
 
-    driver.get(TARGET_URL)  # must open domain before adding cookies
+    driver.get(TARGET_URL)
     for cookie in cookies:
         cookie_dict = {
             "name": cookie["name"],
@@ -63,7 +58,10 @@ def load_cookies(driver, cookies_file):
             "secure": cookie.get("secure", True),
             "httpOnly": cookie.get("httpOnly", False),
         }
-        driver.add_cookie(cookie_dict)
+        try:
+            driver.add_cookie(cookie_dict)
+        except Exception as e:
+            print(f"⚠️ Skipped cookie {cookie['name']}: {e}")
 
     print("✅ Cookies loaded.")
 
@@ -73,12 +71,12 @@ def keep_alive(driver):
     print(f"🌍 Navigated to {TARGET_URL}")
     time.sleep(5)
 
-    # Example: check if user menu exists (indicating logged in)
     try:
-        user_menu = driver.find_element(By.CSS_SELECTOR, ".user-menu")
-        print("🔐 Logged in successfully, user menu found.")
+        # check for user avatar link
+        driver.find_element(By.CSS_SELECTOR, "a.hsoub-menu-item-link--is-img")
+        print("🔐 Logged in successfully, user avatar found.")
     except Exception:
-        print("⚠️ Could not find user menu, maybe cookies expired?")
+        print("⚠️ Could not find user avatar, maybe cookies expired?")
 
 
 def main():
