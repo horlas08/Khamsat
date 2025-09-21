@@ -1,66 +1,94 @@
 import time
-import pickle
+import json
+import os
+import tempfile
+import subprocess
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 
-def keep_khamsat_active():
-    print("🚀 Script start.")
+COOKIES_FILE = "cookies.json"
+TARGET_URL = "https://khamsat.com/"
 
-    # --- Setup headless Chrome ---
-    options = Options()
+def get_chrome_major_version():
+    result = subprocess.run(
+        ["/usr/bin/google-chrome", "--version"],
+        capture_output=True, text=True
+    )
+    version = result.stdout.strip().split()[2]
+    return version.split(".")[0]
+
+def setup_driver():
+    options = webdriver.ChromeOptions()
     options.add_argument("--headless=new")
-    options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
 
-    driver = webdriver.Chrome(options=options)
+    temp_user_data_dir = tempfile.mkdtemp()
+    options.add_argument(f"--user-data-dir={temp_user_data_dir}")
 
-    try:
-        # --- Load cookies ---
+    chrome_major = get_chrome_major_version()
+
+    # 🔑 Force webdriver_manager to download correct driver
+    driver = webdriver.Chrome(
+        service=Service(ChromeDriverManager(driver_version=chrome_major).install()),
+        options=options
+    )
+    return driver
+
+def load_cookies(driver, cookies_file):
+    if not os.path.exists(cookies_file):
+        print(f"❌ Cookies file not found: {cookies_file}")
+        return
+
+    with open(cookies_file, "r") as f:
+        cookies = json.load(f)
+
+    driver.get(TARGET_URL)
+    for cookie in cookies:
         try:
-            with open("khamsat_cookies.pkl", "rb") as f:
-                cookies = pickle.load(f)
-            driver.get("https://khamsat.com/")  # must open before adding cookies
-            for cookie in cookies:
-                if "sameSite" in cookie:
-                    if cookie["sameSite"] == "None":
-                        cookie["sameSite"] = "Strict"
-                driver.add_cookie(cookie)
-            print("✅ Cookies loaded.")
-        except FileNotFoundError:
-            print("❌ No cookie file found (khamsat_cookies.pkl). Please log in and save cookies first.")
-            return
+            driver.add_cookie(cookie)
+        except Exception as e:
+            print(f"⚠️ Skipped cookie {cookie.get('name')}: {e}")
 
-        # --- Reload after cookies ---
-        driver.get("https://khamsat.com/")
-        print("🌍 Navigated to https://khamsat.com/")
+    print("✅ Cookies loaded.")
 
-        # --- Wait and check for username ---
-        selectors = [
-            'a.hsoub-dropdown-item-link[href="/user/qozeem"]',
-            'a.hsoub-menu-item-link[href="/user/qozeem"]'
-        ]
+def keep_alive(driver):
+    driver.get(TARGET_URL)
+    print(f"🌍 Navigated to {TARGET_URL}")
 
-        user_found = False
-        for selector in selectors:
-            try:
-                user_link = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, selector))
-                )
-                print("✅ Logged in as:", user_link.text.strip())
-                user_found = True
-                break
-            except:
-                continue
+    selectors = [
+        'a.hsoub-dropdown-item-link[href="/user/qozeem"]',
+        'a.hsoub-menu-item-link[href="/user/qozeem"]'
+    ]
 
-        if not user_found:
-            print("⚠️ Could not find user menu — maybe cookies expired?")
+    user_found = False
+    for selector in selectors:
+        try:
+            element = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, selector))
+            )
+            print("🔐 Logged in successfully:", element.text.strip())
+            user_found = True
+            break
+        except:
+            continue
 
+    if not user_found:
+        print("⚠️ Could not find user menu — maybe cookies expired?")
+
+def main():
+    print("🚀 Script start.")
+    driver = setup_driver()
+    try:
+        load_cookies(driver, COOKIES_FILE)
+        keep_alive(driver)
     finally:
         driver.quit()
         print("🛑 Driver closed.")
 
 if __name__ == "__main__":
-    keep_khamsat_active()
+    main()
