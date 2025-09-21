@@ -15,15 +15,6 @@ COOKIES_FILE = "cookies.json"
 TARGET_URL = "https://khamsat.com/"
 
 
-def get_chrome_major_version():
-    result = subprocess.run(
-        ["/opt/google/chrome/chrome", "--version"],
-        capture_output=True, text=True
-    )
-    version = result.stdout.strip().split()[2]
-    return version.split(".")[0]
-
-
 def setup_driver():
     options = webdriver.ChromeOptions()
     options.add_argument("--headless=new")
@@ -33,10 +24,9 @@ def setup_driver():
     temp_user_data_dir = tempfile.mkdtemp()
     options.add_argument(f"--user-data-dir={temp_user_data_dir}")
 
-    chrome_major = get_chrome_major_version()
-
+    # ✅ Always download the correct driver for installed Chrome
     driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager(driver_version=chrome_major).install()),
+        service=Service(ChromeDriverManager().install()),
         options=options
     )
     return driver
@@ -71,33 +61,26 @@ def load_cookies(driver, cookies_file):
 def keep_alive(driver):
     driver.get(TARGET_URL)
     print(f"🌍 Navigated to {TARGET_URL}")
-    time.sleep(5)
 
-    try:
-        wait = WebDriverWait(driver, 10)
-        selectors = [
-            "a.hsoub-dropdown-item-link[href*='/user/qozeem']",
-            "a.hsoub-menu-item-link[href*='/user/qozeem']",
-        ]
+    selectors = [
+        'a.hsoub-dropdown-item-link[href="/user/qozeem"]',
+        'a.hsoub-menu-item-link[href="/user/qozeem"]',
+    ]
 
-        username_element = None
-        for selector in selectors:
-            try:
-                username_element = wait.until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, selector))
-                )
-                print(f"✅ Found user menu with selector: {selector}")
-                break
-            except Exception:
-                continue
+    found = False
+    for selector in selectors:
+        try:
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, selector))
+            )
+            print("🔐 Logged in successfully, user element found.")
+            found = True
+            break
+        except Exception:
+            continue
 
-        if username_element:
-            print("🎯 Session still active.")
-        else:
-            print("🛑 Could not find user menu → cookies likely expired.")
-
-    except Exception as e:
-        print(f"⚠️ Error while checking session: {e}")
+    if not found:
+        print("⚠️ Could not find user element, maybe cookies expired?")
 
 
 def main():
