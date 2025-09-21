@@ -1,8 +1,8 @@
-import time
 import json
 import os
 import tempfile
 import subprocess
+import time
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -10,16 +10,19 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
+
 COOKIES_FILE = "cookies.json"
 TARGET_URL = "https://khamsat.com/"
 
+
 def get_chrome_major_version():
     result = subprocess.run(
-        ["/usr/bin/google-chrome", "--version"],
+        ["/opt/google/chrome/chrome", "--version"],
         capture_output=True, text=True
     )
     version = result.stdout.strip().split()[2]
     return version.split(".")[0]
+
 
 def setup_driver():
     options = webdriver.ChromeOptions()
@@ -32,12 +35,12 @@ def setup_driver():
 
     chrome_major = get_chrome_major_version()
 
-    # 🔑 Force webdriver_manager to download correct driver
     driver = webdriver.Chrome(
         service=Service(ChromeDriverManager(driver_version=chrome_major).install()),
         options=options
     )
     return driver
+
 
 def load_cookies(driver, cookies_file):
     if not os.path.exists(cookies_file):
@@ -49,46 +52,65 @@ def load_cookies(driver, cookies_file):
 
     driver.get(TARGET_URL)
     for cookie in cookies:
+        cookie_dict = {
+            "name": cookie["name"],
+            "value": cookie["value"],
+            "domain": cookie["domain"],
+            "path": cookie.get("path", "/"),
+            "secure": cookie.get("secure", True),
+            "httpOnly": cookie.get("httpOnly", False),
+        }
         try:
-            driver.add_cookie(cookie)
+            driver.add_cookie(cookie_dict)
         except Exception as e:
-            print(f"⚠️ Skipped cookie {cookie.get('name')}: {e}")
+            print(f"⚠️ Skipped cookie {cookie['name']}: {e}")
 
     print("✅ Cookies loaded.")
+
 
 def keep_alive(driver):
     driver.get(TARGET_URL)
     print(f"🌍 Navigated to {TARGET_URL}")
+    time.sleep(5)
 
-    selectors = [
-        'a.hsoub-dropdown-item-link[href="/user/qozeem"]',
-        'a.hsoub-menu-item-link[href="/user/qozeem"]'
-    ]
+    try:
+        wait = WebDriverWait(driver, 10)
+        selectors = [
+            "a.hsoub-dropdown-item-link[href*='/user/qozeem']",
+            "a.hsoub-menu-item-link[href*='/user/qozeem']",
+        ]
 
-    user_found = False
-    for selector in selectors:
-        try:
-            element = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, selector))
-            )
-            print("🔐 Logged in successfully:", element.text.strip())
-            user_found = True
-            break
-        except:
-            continue
+        username_element = None
+        for selector in selectors:
+            try:
+                username_element = wait.until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, selector))
+                )
+                print(f"✅ Found user menu with selector: {selector}")
+                break
+            except Exception:
+                continue
 
-    if not user_found:
-        print("⚠️ Could not find user menu — maybe cookies expired?")
+        if username_element:
+            print("🎯 Session still active.")
+        else:
+            print("🛑 Could not find user menu → cookies likely expired.")
+
+    except Exception as e:
+        print(f"⚠️ Error while checking session: {e}")
+
 
 def main():
     print("🚀 Script start.")
     driver = setup_driver()
+
     try:
         load_cookies(driver, COOKIES_FILE)
         keep_alive(driver)
     finally:
         driver.quit()
         print("🛑 Driver closed.")
+
 
 if __name__ == "__main__":
     main()
