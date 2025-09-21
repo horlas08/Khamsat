@@ -73,7 +73,7 @@ def keep_alive(driver):
 
     try:
         # check for user avatar link
-        driver.find_element(By.CSS_SELECTOR, "a.hsoub-menu-item-link--is-img")
+        driver.find_element(By.CSS_SELECTOR, "a.hsoub-dropdown-item-link[href="/user/qozeem"]")
         print("🔐 Logged in successfully, user avatar found.")
     except Exception:
         print("⚠️ Could not find user avatar, maybe cookies expired?")
