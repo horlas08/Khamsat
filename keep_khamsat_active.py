@@ -1,8 +1,10 @@
 import json
 import os
 import time
-import undetected_chromedriver as uc
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -20,19 +22,18 @@ CUSTOM_HEADERS = {
     "Referer": "https://accounts.hsoub.com/",
 }
 
-
 def setup_driver():
-    options = uc.ChromeOptions()
-    options.add_argument("--headless=new")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
+    chrome_options = Options()
+    chrome_options.binary_location = "/usr/local/bin/google-chrome"
+    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument(f'--user-agent={CUSTOM_HEADERS["User-Agent"]}')
+    # Optionally add more headers with CDP if needed
 
-    # Inject headers via "prefs"
-    options.add_argument(f'--user-agent={CUSTOM_HEADERS["User-Agent"]}')
-
-    driver = uc.Chrome(options=options)
+    service = Service("/usr/local/bin/chromedriver")
+    driver = webdriver.Chrome(service=service, options=chrome_options)
     return driver
-
 
 def load_cookies(driver, cookies_file):
     if not os.path.exists(cookies_file):
@@ -57,7 +58,6 @@ def load_cookies(driver, cookies_file):
             print(f"⚠️ Skipped cookie {cookie['name']}: {e}")
     print("✅ Cookies loaded.")
 
-
 def keep_alive(driver):
     driver.get(TARGET_URL)
     print("🌍 Navigated to Khamsat with custom headers + cookies")
@@ -69,7 +69,6 @@ def keep_alive(driver):
         print("🔐 Logged in successfully!")
     except Exception:
         print("⚠️ Could not confirm login, maybe cookies expired?")
-
 
 def main():
     print("🚀 Script start")
@@ -85,7 +84,6 @@ def main():
     finally:
         driver.quit()
         print("🛑 Driver closed")
-
 
 if __name__ == "__main__":
     main()
