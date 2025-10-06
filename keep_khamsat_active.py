@@ -1,6 +1,8 @@
 import json
 import os
 import time
+import smtplib
+from email.message import EmailMessage
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -22,9 +24,66 @@ CUSTOM_HEADERS = {
     "Referer": "https://accounts.hsoub.com/",
 }
 
+
+def send_email_notification(subject: str, body: str) -> None:
+    """Send an email using SMTP settings from environment variables.
+
+    Required env vars:
+      - SMTP_HOST
+      - SMTP_PORT (int)
+      - SMTP_FROM
+      - SMTP_TO (comma-separated for multiple)
+    Optional env vars:
+      - SMTP_USER, SMTP_PASSWORD (for auth)
+      - SMTP_USE_TLS (default: true)
+      - SMTP_USE_SSL (default: false). If true, SSL is used instead of starttls.
+    """
+    host = os.getenv("SMTP_HOST", "smtp.gmail.com")
+    port = os.getenv("SMTP_PORT", "465")
+    sender = os.getenv("SMTP_FROM", "qozeemmonsurudeen@gmail.com'")
+    recipients = os.getenv("SMTP_TO", 'qozeemmonsurudeen@gmail.com')
+    user = os.getenv("SMTP_USER", "qozeemmonsurudeen@gmail.com")
+    password = os.getenv("SMTP_PASSWORD","rzjf yqvo rvpl chuv")
+
+    use_tls = (os.getenv("SMTP_USE_TLS", "false").lower() in ("1", "true", "yes", "y"))
+    use_ssl = (os.getenv("SMTP_USE_SSL", "true").lower() in ("1", "true", "yes", "y"))
+
+    if not host or not port or not sender or not recipients:
+        print("✉️ Email not sent: missing SMTP env vars (SMTP_HOST, SMTP_PORT, SMTP_FROM, SMTP_TO)")
+        return
+
+    try:
+        to_list = [addr.strip() for addr in recipients.split(",") if addr.strip()]
+        msg = EmailMessage()
+        msg["From"] = sender
+        msg["To"] = ", ".join(to_list)
+        msg["Subject"] = subject
+        msg.set_content(body)
+
+        port_i = int(port)
+        if use_ssl:
+            with smtplib.SMTP_SSL(host, port_i) as smtp:
+                if user and password:
+                    smtp.login(user, password)
+                smtp.send_message(msg)
+        else:
+            with smtplib.SMTP(host, port_i) as smtp:
+                smtp.ehlo()
+                if use_tls:
+                    try:
+                        smtp.starttls()
+                    except Exception as e:
+                        print(f"⚠️ STARTTLS failed: {e}")
+                if user and password:
+                    smtp.login(user, password)
+                smtp.send_message(msg)
+        print("✅ Notification email sent")
+    except Exception as e:
+        print(f"❌ Failed to send email: {e}")
+
 def setup_driver():
     chrome_options = Options()
-    chrome_options.binary_location = "/usr/local/bin/google-chrome"
+    # chrome_options.binary_location = "/usr/local/bin/google-chrome"
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
@@ -32,7 +91,8 @@ def setup_driver():
     # Optionally add more headers with CDP if needed
 
     service = Service("/usr/local/bin/chromedriver")
-    driver = webdriver.Chrome(service=service, options=chrome_options)
+    driver = webdriver.Chrome( options=chrome_options)
+    driver.fullscreen_window()
     return driver
 
 def load_cookies(driver, cookies_file):
@@ -44,9 +104,10 @@ def load_cookies(driver, cookies_file):
         cookies = json.load(f)
 
     driver.get("https://khamsat.com/")  # open once before adding cookies
+    driver.delete_all_cookies()
     for cookie in cookies:
         try:
-            driver.add_cookie({
+           driver.add_cookie({
                 "name": cookie["name"],
                 "value": cookie["value"],
                 "domain": cookie["domain"],
@@ -54,24 +115,41 @@ def load_cookies(driver, cookies_file):
                 "secure": cookie.get("secure", True),
                 "httpOnly": cookie.get("httpOnly", False),
             })
+           driver.refresh()
+           print( driver.get_cookies())
         except Exception as e:
+            print(e)
             print(f"⚠️ Skipped cookie {cookie['name']}: {e}")
-    print("✅ Cookies loaded.")
+    print(f"✅ Cookies loaded.{len(driver.get_cookies())}")
 
 def keep_alive(driver):
     driver.get(TARGET_URL)
     print("🌍 Navigated to Khamsat with custom headers + cookies")
 
     try:
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "a[href^='/user/']"))
+        WebDriverWait(driver, 2).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "a[href^='/service/create']"))
         )
+
         print("🔐 Logged in successfully!")
-    except Exception:
+    except Exception as e:
         print("⚠️ Could not confirm login, maybe cookies expired?")
+        # Send notification email about the failure
+        try:
+            now = time.strftime("%Y-%m-%d %H:%M:%S")
+            subject = "Khamsat keep-alive: Login check failed"
+            body = (
+                f"Login confirmation failed at {now}.\n"
+                f"URL: {TARGET_URL}\n"
+                f"Error: {repr(e)}\n\n"
+                "This usually indicates expired cookies. The script will still save debug_page.html/png if configured in main."
+            )
+            send_email_notification(subject, body)
+        except Exception as inner_e:
+            print(f"⚠️ Failed to trigger email notification: {inner_e}")
 
 def main():
-    print("🚀 Script start")
+
     driver = setup_driver()
     try:
         load_cookies(driver, COOKIES_FILE)
