@@ -85,14 +85,16 @@ def send_email_notification(subject: str, body: str) -> None:
 def setup_driver():
     chrome_options = Options()
     # chrome_options.binary_location = "/usr/local/bin/google-chrome"
-    temp_dir = tempfile.mkdtemp()
-    chrome_options.add_argument(f"--user-data-dir={temp_dir}")
+    
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument(f'--user-agent={CUSTOM_HEADERS["User-Agent"]}')
     # Optionally add more headers with CDP if needed
-
+    temp_dir = tempfile.mkdtemp(prefix="chrome-user-data-")
+    chrome_options.add_argument("--disable-gpu")  
+    chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument(f"--user-data-dir={temp_dir}")
     service = Service("/usr/local/bin/chromedriver")
     driver = webdriver.Chrome( options=chrome_options)
     driver.fullscreen_window()
