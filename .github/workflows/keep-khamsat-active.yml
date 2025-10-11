@@ -2,7 +2,7 @@ name: Keep Khamsat Logged In and Active
 
 on:
   schedule:
-    - cron: "*/8 * * * *"   # run every 8 minutes
+    - cron: "0 */6 * * *"   # run every 8 minutes
   workflow_dispatch:
 
 jobs:
