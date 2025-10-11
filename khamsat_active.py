@@ -84,6 +84,8 @@ def send_email_notification(subject: str, body: str) -> None:
 def setup_driver():
     chrome_options = Options()
     # chrome_options.binary_location = "/usr/local/bin/google-chrome"
+    temp_dir = tempfile.mkdtemp()
+    chrome_options.add_argument(f"--user-data-dir={temp_dir}")
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
