@@ -2,6 +2,7 @@ import json
 import os
 import time
 import smtplib
+import tempfile
 from email.message import EmailMessage
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
