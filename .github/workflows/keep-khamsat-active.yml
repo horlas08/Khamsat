@@ -23,7 +23,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install setuptools
-          pip install selenium undetected-chromedriver requests
+          pip install selenium undetected-chromedriver requests beautifulsoup4
 
       - name: Install Chrome & Chromedriver (Chrome for Testing)
         run: |
@@ -50,7 +50,7 @@ jobs:
       - name: Run the Khamsat activity script
         env:
           PATH: /usr/local/bin:$PATH
-        run: python3 keep_khamsat_active.py
+        run: python3 khamsat_active.py
 
       - name: Upload debug artifacts
         uses: actions/upload-artifact@v4
