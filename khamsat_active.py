@@ -149,7 +149,7 @@ def keep_alive(driver):
             print(f"⚠️ Failed to trigger email notification: {inner_e}")
 
 def main():
-     global last_alert_unreads
+    global last_alert_unreads
     driver = setup_driver()
     last_alert_unreads = 0
     try:
