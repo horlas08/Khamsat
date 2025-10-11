@@ -151,6 +151,7 @@ def keep_alive(driver):
 def main():
 
     driver = setup_driver()
+    last_alert_unreads = 0
     try:
         load_cookies(driver, COOKIES_FILE)
         keep_alive(driver)
@@ -188,13 +189,17 @@ def main():
                         print("🔔 Unread Notifications:", data["unread_notifications_count"])
                         print("✉️ Unread Messages:", data["unread_messages_count"])
                         print("✉️ total Messages:", unreads)
-                        if unreads > 0:
+                        global last_alert_unreads
+                        if unreads == 0:
+                            last_alert_unreads = 0
+                        if unreads > last_alert_unreads:
                             send_email_notification(
                                 "Khamsat keep-alive: Unread Notifications",
                                 f"Unread Notifications: {data['unread_notifications_count']}\n"
                                 f"Unread Messages: {data['unread_messages_count']}\n"
                                 f"Total Messages: {unreads}",
                             )
+                            last_alert_unreads = unreads
                     except json.JSONDecodeError:
                         print("⚠️ JSON Decode Failed")
                 else:
