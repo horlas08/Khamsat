@@ -44,7 +44,7 @@ def send_email_notification(subject: str, body: str) -> None:
     sender = os.getenv("SMTP_FROM", "qozeemmonsurudeen@gmail.com'")
     recipients = os.getenv("SMTP_TO", 'qozeemmonsurudeen@gmail.com')
     user = os.getenv("SMTP_USER", "qozeemmonsurudeen@gmail.com")
-    password = os.getenv("SMTP_PASSWORD", "rzjf yqvo rvpl chuv")
+    password = os.getenv("SMTP_PASSWORD","rzjf yqvo rvpl chuv")
 
     use_tls = (os.getenv("SMTP_USE_TLS", "false").lower() in ("1", "true", "yes", "y"))
     use_ssl = (os.getenv("SMTP_USE_SSL", "true").lower() in ("1", "true", "yes", "y"))
@@ -82,7 +82,6 @@ def send_email_notification(subject: str, body: str) -> None:
     except Exception as e:
         print(f"❌ Failed to send email: {e}")
 
-
 def setup_driver():
     chrome_options = Options()
     # chrome_options.binary_location = "/usr/local/bin/google-chrome"
@@ -93,15 +92,14 @@ def setup_driver():
     chrome_options.add_argument(f'--user-agent={CUSTOM_HEADERS["User-Agent"]}')
     # Optionally add more headers with CDP if needed
     temp_dir = tempfile.mkdtemp(prefix="chrome-user-data-")
-    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--disable-gpu")  
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument(f"--user-data-dir={temp_dir}")
     # service = Service("/usr/local/bin/chromedriver")
-    service = Service("/usr/lib/chromium-browser/chromedriver")
-    driver = webdriver.Chrome(options=chrome_options)
+    service = Service("/usr/lib/chromium-browser/chromedriver") 
+    driver = webdriver.Chrome( options=chrome_options)
     driver.fullscreen_window()
     return driver
-
 
 def load_cookies(driver, cookies_file):
     if not os.path.exists(cookies_file):
@@ -115,7 +113,7 @@ def load_cookies(driver, cookies_file):
     driver.delete_all_cookies()
     for cookie in cookies:
         try:
-            driver.add_cookie({
+           driver.add_cookie({
                 "name": cookie["name"],
                 "value": cookie["value"],
                 "domain": cookie["domain"],
@@ -123,13 +121,12 @@ def load_cookies(driver, cookies_file):
                 "secure": cookie.get("secure", True),
                 "httpOnly": cookie.get("httpOnly", False),
             })
-            driver.refresh()
-            print(driver.get_cookies())
+           driver.refresh()
+           print( driver.get_cookies())
         except Exception as e:
             print(e)
             print(f"⚠️ Skipped cookie {cookie['name']}: {e}")
     print(f"✅ Cookies loaded.{len(driver.get_cookies())}")
-
 
 def keep_alive(driver):
     driver.get(TARGET_URL)
@@ -156,7 +153,6 @@ def keep_alive(driver):
             send_email_notification(subject, body)
         except Exception as inner_e:
             print(f"⚠️ Failed to trigger email notification: {inner_e}")
-
 
 def main():
     global last_alert_unreads
@@ -199,7 +195,7 @@ def main():
                         print("🔔 Unread Notifications:", data["unread_notifications_count"])
                         print("✉️ Unread Messages:", data["unread_messages_count"])
                         print("✉️ total Messages:", unreads)
-
+                       
                         if unreads == 0:
                             last_alert_unreads = 0
                         if unreads > last_alert_unreads:
@@ -221,7 +217,6 @@ def main():
     finally:
         driver.quit()
         print("🛑 Driver closed")
-
 
 if __name__ == "__main__":
     main()
